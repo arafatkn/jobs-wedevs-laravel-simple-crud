@@ -65,12 +65,14 @@ class ProductController extends Controller
         $req->validate([
             'title' => 'bail|required|max:256',
             'price' => 'bail|required|numeric',
-            'image' => 'bail|required|image',
+            'image' => 'bail|nullable|image',
         ]);
 
         $product->fill( $req->only(['title','price','slug','description']) );
-        $image = $req->file('image');
-        $product->image = Product::uploadImage($image);
+        if($req->image) {
+            $image = $req->file('image');
+            $product->image = Product::uploadImage($image);
+        }
 
         if($product->save()) {
             return response()->json([
@@ -86,7 +88,7 @@ class ProductController extends Controller
     {
         if($product->delete())
             return response()->json([
-                'message' => $product->name_en.' has been deleted successfully.',
+                'message' => $product->title.' has been deleted successfully.',
                 'data' => new ProductResource($product)
             ]);
         
